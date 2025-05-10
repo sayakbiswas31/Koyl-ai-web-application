@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sayak AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Sayak AI: Nutrition Recommendations</h1>
+    <form method="POST" action="/">
+        <textarea
+            name="health_problem"
+            placeholder="Enter health problem (e.g., high blood pressure, diabetes)"
+            rows="4"
+            cols="50">{{ request.form.get('health_problem', '') }}</textarea>
+        <textarea
+            name="allergies"
+            placeholder="Enter allergies (e.g., dairy, nuts)"
+            rows="2"
+            cols="50">{{ request.form.get('allergies', '') }}</textarea>
+        <button type="submit">Get Recommendations</button>
+    </form>
+
+    {% if recommendations %}
+        <div class="result">
+            <h2>Recommendations:</h2>
+            <p>{{ recommendations }}</p>
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="error">
+            <h2>Error:</h2>
+            <p>{{ error }}</p>
+        </div>
+    {% endif %}
+
+    <footer style="text-align: center; margin-top: 40px; font-size: 0.9em; color: gray;">
+        &copy; 2025 Sayak Biswas. All rights reserved.
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

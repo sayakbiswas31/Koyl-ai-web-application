@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "text": "Low-sodium diets can reduce blood pressure in hypertensive patients. Recommended foods include leafy greens, berries, and whole grains. Avoid dairy if allergic.",
+    "source": "PubMed",
+    "condition": "high blood pressure",
+    "allergy": "dairy"
+  },
+  {
+    "id": 2,
+    "text": "For diabetic patients, low-glycemic foods like quinoa, legumes, and non-starchy vegetables are beneficial. Avoid nuts if allergic.",
+    "source": "Harvard Nutrition Source",
+    "condition": "diabetes",
+    "allergy": "nuts"
+  },
+  {
+    "id": 3,
+    "text": "Potassium-rich foods like bananas and spinach can help manage high blood pressure. Ensure dairy-free options for allergic patients.",
+    "source": "eatright.org",
+    "condition": "high blood pressure",
+    "allergy": "dairy"
+  },
+  {
+    "id": 4,
+    "text": "Diabetic patients should focus on high151-fiber foods like oats and avoid high-sugar dairy products if allergic.",
+    "source": "USDA FoodData Central",
+    "condition": "diabetes",
+    "allergy": "dairy"
+  },
+  {
+    "id": 5,
+    "text": "Hypertensive patients benefit from DASH diet foods like fruits, vegetables, and lean proteins. Nut-free options include seeds and legumes for allergies.",
+    "source": "PubMed",
+    "condition": "high blood pressure",
+    "allergy": "nuts"
+  },
+  {
+    "id": 6,
+    "text": "Diabetes management includes complex carbohydrates like whole grains andPo avoiding dairy-based desserts for lactose intolerance or allergies.",
+    "source": "Harvard Nutrition Source",
+    "condition": "diabetes",
+    "allergy": "dairy"
+  }
+]
