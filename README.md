@@ -18,9 +18,6 @@ It features a lightweight **text-matching recommendation engine** 🔍 and a **m
 * 🚫 **Error Handling:** Client-side (JavaScript) & server-side (Flask) validation for invalid inputs.
 * 📦 **Output Display:**
 
-  * ✅ Recommendations: Shown in a **green box**
-  * ❌ Errors: Displayed in a **red box**
-* 🎥 **Sample Video:** Demo available (`Koyl_AI_Demo_Video.mp4`) showing app functionality.
 
 ---
 
