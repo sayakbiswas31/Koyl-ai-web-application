@@ -16,9 +16,6 @@ It features a lightweight **text-matching recommendation engine** 🔍 and a **m
 * 🤖 **Recommendation Engine:** Lightweight, keyword-based matching (supports synonyms like *“hypertension”* for *“high blood pressure”*).
 * 💻 **Responsive UI:** Clean, user-friendly interface built using HTML, CSS, and JavaScript.
 * 🚫 **Error Handling:** Client-side (JavaScript) & server-side (Flask) validation for invalid inputs.
-* 📦 **Output Display:**
-
-
 ---
 
 ## 🛠️ Technologies Used
