@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from services.data_fetcher import fetch_pubmed_data
 from services.model_trainer import train_model, load_trained_model
 from services.rag_pipeline import preprocess_and_embed, store_in_faiss, load_faiss_vector_store, setup_rag_pipeline, query_rag
-import torch
+
 app = Flask(__name__)
 
 def initialize_system():
@@ -18,13 +18,10 @@ def initialize_system():
         print("No documents fetched.")
         return None, (None, None)
     
-    # Try to load existing trained model
-    model, tokenizer = load_trained_model()
-    if model is None or tokenizer is None:
-        print("No trained model found or invalid model. Training new model...")
-        model, tokenizer = train_model(all_documents)
-        if model is None:
-            print("Model training failed. Proceeding without trained model.")
+    # Train model
+    model, tokenizer = train_model(all_documents)
+    if model is None:
+        print("Model training failed. Proceeding without trained model.")
     
     # Setup RAG pipeline
     texts, embeddings = preprocess_and_embed(all_documents)
@@ -65,6 +62,6 @@ def query():
         "sources": source_texts,
         "category": category
     })
-if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
 
+if __name__ == '__main__':
+    app.run(debug=True)

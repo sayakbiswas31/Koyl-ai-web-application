@@ -3,43 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayak AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Disease and Allergy Query</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
 </head>
 <body>
-    <h1>Sayak AI: Nutrition Recommendations</h1>
-    <form method="POST" action="/">
-        <textarea
-            name="health_problem"
-            placeholder="Enter health problem (e.g., high blood pressure, diabetes)"
-            rows="4"
-            cols="50">{{ request.form.get('health_problem', '') }}</textarea>
-        <textarea
-            name="allergies"
-            placeholder="Enter allergies (e.g., dairy, nuts)"
-            rows="2"
-            cols="50">{{ request.form.get('allergies', '') }}</textarea>
-        <button type="submit">Get Recommendations</button>
-    </form>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Disease and Allergy Query</h1>
+        
+        <!-- Query Form -->
+        <form id="queryForm" class="mb-4">
+            <div class="input-group mb-3">
+                <input type="text" id="question" name="question" class="form-control" 
+                       placeholder="Ask about disease or allergy symptoms (e.g., What are the symptoms of asthma?)" 
+                       aria-label="Query input" required autocomplete="off">
+                <button class="btn btn-primary" type="submit" id="submitBtn">Submit</button>
+            </div>
+            <!-- Query Suggestions -->
+            <div id="suggestions" class="list-group position-absolute w-50" style="z-index: 1000;"></div>
+        </form>
 
-    {% if recommendations %}
-        <div class="result">
-            <h2>Recommendations:</h2>
-            <p>{{ recommendations }}</p>
+        <!-- Loading Spinner -->
+        <div id="loading" class="text-center d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
-    {% endif %}
 
-    {% if error %}
-        <div class="error">
-            <h2>Error:</h2>
-            <p>{{ error }}</p>
+        <!-- Results -->
+        <div id="error" class="alert alert-danger d-none" role="alert"></div>
+        <div id="result" class="card mb-3 d-none">
+            <div class="card-body">
+                <h5 class="card-title">Answer</h5>
+                <p id="answerText" class="card-text"></p>
+            </div>
         </div>
-    {% endif %}
+        <div id="category" class="card mb-3 d-none">
+            <div class="card-body">
+                <h5 class="card-title">Category</h5>
+                <p id="categoryText" class="card-text"></p>
+            </div>
+        </div>
+        <div id="sources" class="card mb-3 d-none">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#sourcesCollapse" aria-expanded="true" aria-controls="sourcesCollapse">
+                        Sources
+                    </button>
+                </h5>
+            </div>
+            <div id="sourcesCollapse" class="collapse show">
+                <div class="card-body" id="sourcesText"></div>
+            </div>
+        </div>
 
-    <footer style="text-align: center; margin-top: 40px; font-size: 0.9em; color: gray;">
-        &copy; 2025 Sayak Biswas. All rights reserved.
-    </footer>
+        <!-- Query History -->
+        <div id="history" class="card mb-3 d-none">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Queries</h5>
+            </div>
+            <div class="card-body" id="historyText"></div>
+        </div>
+    </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- Bootstrap JS and Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const queryInput = document.getElementById('question');
+        const suggestionsDiv = document.getElementById('suggestions');
+        const queryForm = document.getElementById('queryForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const errorDiv = document.getElementById('error');
+        const resultDiv = document.getElementById('result');
+        const answerText = document.getElementById('answerText');
+        const categoryDiv = document.getElementById('category');
+        const categoryText = document.getElementById('categoryText');
+        const sourcesDiv = document.getElementById('sources');
+        const sourcesText = document.getElementById('sourcesText');
+        const historyDiv = document.getElementById('history');
+        const historyText = document.getElementById('historyText');
+
+        // Sample suggestions
+        const suggestions = [
+            "What are the symptoms of asthma?",
+            "What causes food allergies?",
+            "How to treat seasonal allergies?",
+            "What are the symptoms of diabetes?",
+            "What is anaphylaxis?"
+        ];
+
+        // Load query history from localStorage
+        let queryHistory = JSON.parse(localStorage.getItem('queryHistory')) || [];
+        function updateHistory() {
+            if (queryHistory.length > 0) {
+                historyText.innerHTML = queryHistory.map((q, i) => `
+                    <p><a href="#" class="history-link" data-query="${q}">${i + 1}. ${q}</a></p>
+                `).join('');
+                historyDiv.classList.remove('d-none');
+                // Add click handlers for history links
+                document.querySelectorAll('.history-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        queryInput.value = e.target.dataset.query;
+                        queryForm.dispatchEvent(new Event('submit'));
+                    });
+                });
+            }
+        }
+        updateHistory();
+
+        // Query suggestions
+        queryInput.addEventListener('input', () => {
+            const value = queryInput.value.toLowerCase();
+            suggestionsDiv.innerHTML = '';
+            if (value) {
+                const matches = suggestions.filter(s => s.toLowerCase().includes(value));
+                if (matches.length > 0) {
+                    suggestionsDiv.innerHTML = matches.map(s => `
+                        <a href="#" class="list-group-item list-group-item-action suggestion">${s}</a>
+                    `).join('');
+                    document.querySelectorAll('.suggestion').forEach(s => {
+                        s.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            queryInput.value = s.textContent;
+                            suggestionsDiv.innerHTML = '';
+                            queryForm.dispatchEvent(new Event('submit'));
+                        });
+                    });
+                }
+            }
+        });
+
+        // Clear suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!queryInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.innerHTML = '';
+            }
+        });
+
+        // Form submission
+        queryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorDiv.classList.add('d-none');
+            resultDiv.classList.add('d-none');
+            categoryDiv.classList.add('d-none');
+            sourcesDiv.classList.add('d-none');
+            loading.classList.remove('d-none');
+            submitBtn.disabled = true;
+
+            const question = queryInput.value;
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `question=${encodeURIComponent(question)}`
+                });
+                const data = await response.json();
+
+                loading.classList.add('d-none');
+                submitBtn.disabled = false;
+
+                if (data.error) {
+                    errorDiv.textContent = data.error;
+                    errorDiv.classList.remove('d-none');
+                    return;
+                }
+
+                // Update results
+                answerText.textContent = data.answer;
+                resultDiv.classList.remove('d-none');
+                categoryText.textContent = data.category;
+                categoryDiv.classList.remove('d-none');
+                sourcesText.innerHTML = data.sources.map((s, i) => `
+                    <p><strong>${i + 1}.</strong> ${s}</p>
+                `).join('');
+                sourcesDiv.classList.remove('d-none');
+
+                // Update history
+                if (!queryHistory.includes(question)) {
+                    queryHistory.unshift(question);
+                    if (queryHistory.length > 5) queryHistory.pop();
+                    localStorage.setItem('queryHistory', JSON.stringify(queryHistory));
+                    updateHistory();
+                }
+            } catch (err) {
+                loading.classList.add('d-none');
+                submitBtn.disabled = false;
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    </script>
 </body>
 </html>
